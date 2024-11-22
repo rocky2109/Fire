@@ -1,0 +1,7 @@
+continue
+max-concurrent-downloads=50000
+max-connections-per-server=20
+user-agent="Mozilla/5.0 (Linux; Android 11; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Mobile Safari/537.36"
+log-level=info
+min-split-size=2M
+max-total-download-limit=0
