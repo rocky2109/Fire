@@ -44,6 +44,14 @@ banner = '''
 
 print(banner)
 
+import os
+import json
+import time
+import shutil
+import subprocess
+from threading import Thread
+from IPython.display import clear_output
+
 def Loading():
     white = 37
     black = 0
@@ -51,27 +59,47 @@ def Loading():
         print("\r" + "░"*white + "▒▒"+ "▓"*black + "▒▒" + "░"*white, end="")
         black = (black + 2) % 75
         white = (white -1) if white != 0 else 37
-        time.sleep(2)
+        time.sleep(0.1)
     clear_output()
 
-
+# Start loading animation
+Working = True
 _Thread = Thread(target=Loading, name="Prepare", args=())
 _Thread.start()
 
+# Fix DUMP_ID format if needed
 if len(str(DUMP_ID)) == 10 and "-100" not in str(DUMP_ID):
-    n_dump = "-100" + str(DUMP_ID)
-    DUMP_ID = int(n_dump)
+    DUMP_ID = int("-100" + str(DUMP_ID))
 
-if os.path.exists("/content/sample_data"):
-    shutil.rmtree("/content/sample_data")
+# Create working directory
+working_dir = "/app/Telegram-Leecher"
+os.makedirs(working_dir, exist_ok=True)
 
-cmd = "git clone https://github.com/XronTrix10/Telegram-Leecher"
-proc = subprocess.run(cmd, shell=True)
-cmd = "apt update && apt install ffmpeg aria2"
-proc = subprocess.run(cmd, shell=True)
-cmd = "pip3 install -r /content/Telegram-Leecher/requirements.txt"
-proc = subprocess.run(cmd, shell=True)
+# Install system dependencies
+try:
+    subprocess.run("apt-get update && apt-get install -y ffmpeg aria2", 
+                 shell=True, check=True)
+except subprocess.CalledProcessError as e:
+    print(f"Failed to install system packages: {e}")
 
+# Clone repository if not exists
+if not os.path.exists(os.path.join(working_dir, ".git")):
+    try:
+        subprocess.run(f"git clone https://github.com/XronTrix10/Telegram-Leecher {working_dir}", 
+                      shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to clone repository: {e}")
+
+# Install Python requirements
+requirements_path = os.path.join(working_dir, "requirements.txt")
+if os.path.exists(requirements_path):
+    try:
+        subprocess.run(f"pip install -r {requirements_path}", 
+                      shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to install requirements: {e}")
+
+# Save credentials
 credentials = {
     "API_ID": API_ID,
     "API_HASH": API_HASH,
@@ -80,14 +108,18 @@ credentials = {
     "DUMP_ID": DUMP_ID,
 }
 
-with open('/content/Telegram-Leecher/credentials.json', 'w') as file:
-    file.write(json.dumps(credentials))
+credentials_path = os.path.join(working_dir, "credentials.json")
+with open(credentials_path, 'w') as file:
+    json.dump(credentials, file)
 
+# Clean up previous session if exists
+session_file = os.path.join(working_dir, "my_bot.session")
+if os.path.exists(session_file):
+    os.remove(session_file)
+
+# Stop loading animation
 Working = False
-
-if os.path.exists("/content/Telegram-Leecher/my_bot.session"):
-    os.remove("/content/Telegram-Leecher/my_bot.session") # Remove previous bot session
-    
+time.sleep(0.5)  # Let animation complete
 print("\rStarting Bot....")
 
 #cd /content/Telegram-Leecher/ && python3 -m colab_leecher #type:ignore
