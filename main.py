@@ -4,11 +4,11 @@
 # @markdown <center><h4><a href="https://github.com/XronTrix10/Telegram-Leecher/wiki/INSTRUCTIONS">READ</a> How to use</h4></center>
 # @markdown <br>
 
-API_ID = 0  # @param {type: "integer"}
-API_HASH = ""  # @param {type: "string"}
-BOT_TOKEN = ""  # @param {type: "string"}
-USER_ID = 0  # @param {type: "integer"}
-DUMP_ID = 0  # @param {type: "integer"}
+API_ID = 10720863  # @param {type: "integer"}
+API_HASH = "2405be04691f86d83e96bdc7c54feb1c"  # @param {type: "string"}
+BOT_TOKEN = "7713046100:AAFMrpwBIX9VkoE_W1A1NOdTisvoFcrfCs0"  # @param {type: "string"}
+USER_ID = 6947378236  # @param {type: "integer"}
+DUMP_ID = -1002526234630  # @param {type: "integer"}
 
 import subprocess
 import json
