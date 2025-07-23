@@ -1,29 +1,48 @@
-# Copyright 2023 © Xron Trix | https://github.com/XronTrix10
-
-# @title Main Colab Leech Code
-# @markdown <center><h4><a href="https://github.com/XronTrix10/Telegram-Leecher/wiki/INSTRUCTIONS">READ</a> How to use</h4></center>
-# @markdown <br>
-
-API_ID = 10720863  # @param {type: "integer"}
-API_HASH = "2405be04691f86d83e96bdc7c54feb1c"  # @param {type: "string"}
-BOT_TOKEN = "7713046100:AAFMrpwBIX9VkoE_W1A1NOdTisvoFcrfCs0"  # @param {type: "string"}
-USER_ID = 6947378236  # @param {type: "integer"}
-DUMP_ID = -1002526234630  # @param {type: "integer"}
-
 import subprocess
 import json
 import os
 import time
+import shutil
 from IPython.display import clear_output
 
+# User-defined variables (set these via environment variables or input)
+API_ID = int(os.getenv("API_ID", "0"))
+API_HASH = os.getenv("API_HASH", "")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+USER_ID = int(os.getenv("USER_ID", "0"))
+DUMP_ID = int(os.getenv("DUMP_ID", "0"))
+
+def check_dependencies():
+    """Check if required dependencies (ffmpeg, aria2) are installed."""
+    dependencies = ["ffmpeg", "aria2c"]
+    missing = []
+    
+    for dep in dependencies:
+        if not shutil.which(dep):
+            missing.append(dep)
+    
+    return missing
+
 def setup_environment():
-    """Set up the working environment and install dependencies."""
+    """Set up the working environment and install dependencies if needed."""
     # Create working directory
     working_dir = "/app/Telegram-Leecher"
     os.makedirs(working_dir, exist_ok=True)
     os.chdir(working_dir)
 
-    # Install system dependencies
+    # Check for existing dependencies
+    missing_deps = check_dependencies()
+    if not missing_deps:
+        print("All required dependencies (ffmpeg, aria2) are already installed.")
+        return True
+
+    # If running in a restricted environment like Koyeb, skip apt-get
+    if os.getenv("KOYEB") or os.geteuid() != 0:
+        print(f"Missing dependencies: {', '.join(missing_deps)}. Cannot install due to restricted environment.")
+        print("Please ensure ffmpeg and aria2 are pre-installed in the container.")
+        return False
+
+    # Install system dependencies (only if running as root)
     try:
         subprocess.run(
             "apt-get update && apt-get install -y ffmpeg aria2",
@@ -32,6 +51,7 @@ def setup_environment():
             capture_output=True,
             text=True
         )
+        print("Successfully installed system dependencies.")
     except subprocess.CalledProcessError as e:
         print(f"Failed to install system packages: {e.stderr}")
         return False
@@ -69,7 +89,6 @@ def setup_environment():
 
 def save_credentials():
     """Save credentials to a JSON file."""
-    # Fix DUMP_ID format if needed
     if len(str(DUMP_ID)) == 10 and "-100" not in str(DUMP_ID):
         dump_id = int("-100" + str(DUMP_ID))
     else:
@@ -141,7 +160,7 @@ def main():
         return
 
     print("Starting Bot...")
-    time.sleep(0.5)  # Brief pause for clarity
+    time.sleep(0.5)
     if not start_bot():
         print("Bot failed to start.")
         return
